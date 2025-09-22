@@ -48,7 +48,9 @@
             padding: 20px;
             width: 100%;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
 
         .generate-btn {
@@ -76,6 +78,40 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
         }
 
+        .read-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 15px 30px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            user-select: none;
+            min-width: 160px;
+            opacity: 0;
+            transform: translateY(20px);
+            visibility: hidden;
+        }
+
+        .read-btn.show {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .read-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .read-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
         .welcome-text {
             color: white;
             font-size: 1.2rem;
@@ -96,6 +132,12 @@
                 min-width: 180px;
             }
             
+            .read-btn {
+                font-size: 1.1rem;
+                padding: 12px 25px;
+                min-width: 140px;
+            }
+            
             .welcome-text {
                 font-size: 1rem;
                 margin-top: 30px;
@@ -112,10 +154,16 @@
                 padding: 15px 30px;
                 min-width: 160px;
             }
+            
+            .read-btn {
+                font-size: 1rem;
+                padding: 10px 20px;
+                min-width: 120px;
+            }
         }
 
-        /* אנימציה נוספת לכפתור */
-        .generate-btn:disabled {
+        /* אנימציה נוספת לכפתורים */
+        .generate-btn:disabled, .read-btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
         }
@@ -132,14 +180,20 @@
         <button id="generateBtn" class="generate-btn" onclick="generateRandomDigit()">
             ספרה רנדומלית
         </button>
+        
+        <button id="readBtn" class="read-btn" onclick="playAudio()">
+            🔊 הקרא
+        </button>
     </div>
 
     <script>
         let isFirstClick = true;
+        let currentDigit = null;
         
         function generateRandomDigit() {
             const digitDisplay = document.getElementById('digitDisplay');
             const generateBtn = document.getElementById('generateBtn');
+            const readBtn = document.getElementById('readBtn');
             
             // אם זה הקליק הראשון, נסיר את הטקסט הפתיחה
             if (isFirstClick) {
@@ -152,16 +206,59 @@
             
             // יצירת ספרה רנדומלית (0-9)
             const randomDigit = Math.floor(Math.random() * 10);
+            currentDigit = randomDigit;
             
             // הוספת אנימציה
             digitDisplay.classList.add('animate');
             digitDisplay.textContent = randomDigit;
+            
+            // הצגת כפתור ההקראה
+            readBtn.classList.add('show');
             
             // הסרת האנימציה והפעלה מחדש של הכפתור
             setTimeout(() => {
                 digitDisplay.classList.remove('animate');
                 generateBtn.disabled = false;
             }, 300);
+        }
+
+        function playAudio() {
+            if (currentDigit === null) return;
+            
+            const readBtn = document.getElementById('readBtn');
+            
+            // השבתת הכפתור זמנית
+            readBtn.disabled = true;
+            
+            // יצירת אלמנט שמע
+            const audio = new Audio(`${currentDigit}.mp3`);
+            
+            // טיפול בטעינה מוצלחת
+            audio.oncanplaythrough = function() {
+                audio.play().catch(error => {
+                    console.error('שגיאה בניגון השמע:', error);
+                    alert('לא ניתן לנגן את קובץ השמע. ודא שקובץ ' + currentDigit + '.mp3 קיים בתקייה.');
+                });
+            };
+            
+            // טיפול בסיום הניגון
+            audio.onended = function() {
+                readBtn.disabled = false;
+            };
+            
+            // טיפול בשגיאה
+            audio.onerror = function() {
+                console.error('שגיאה בטעינת קובץ השמע:', currentDigit + '.mp3');
+                alert('לא ניתן לטעון את קובץ השמע. ודא שקובץ ' + currentDigit + '.mp3 קיים בתקייה.');
+                readBtn.disabled = false;
+            };
+            
+            // הפעלת זמן קצוב למקרה שהשמע לא יטען
+            setTimeout(() => {
+                if (readBtn.disabled) {
+                    readBtn.disabled = false;
+                }
+            }, 3000);
         }
 
         // מניעת זום בעת לחיצה כפולה על המסך
