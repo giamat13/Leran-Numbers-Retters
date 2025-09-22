@@ -59,12 +59,53 @@ const sequenceColors = [
     {color:'rainbow', bg:'#ffbe00'}
 ];
 
+// ---------------- פונקציות cookies ----------------
+function setCookie(name, value, days=30) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = name + "=" + encodeURIComponent(value) + ";expires=" + d.toUTCString() + ";path=/";
+}
+
+function getCookie(name) {
+    const cname = name + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for(let i=0;i<ca.length;i++){
+        let c = ca[i].trim();
+        if (c.indexOf(cname)===0) return c.substring(cname.length,c.length);
+    }
+    return null;
+}
+// ---------------------------------------------------
+
 // טוען את הפונטים מקובץ fonts.txt
 fetch('fonts.txt')
     .then(resp => resp.text())
-    .then(data => { fontClasses = data.split('\n').map(f=>f.trim()).filter(f=>f); })
+    .then(data => {
+        // מכניס את התוכן כ־CSS
+        const styleEl = document.createElement('style');
+        styleEl.textContent = data;
+        document.head.appendChild(styleEl);
+
+        // מחלץ את שמות המחלקות
+        fontClasses = data.split('\n')
+            .map(line => line.match(/^\.(.+?)\s*\{/))
+            .filter(Boolean)
+            .map(match => match[1].trim());
+    })
     .catch(err => console.error('Error loading fonts.txt:', err));
 
+// שחזור מצב קודם מה־cookies
+const savedColorIndex = parseInt(getCookie("colorIndex"));
+const savedClickCounter = parseInt(getCookie("colorClickCounter"));
+if (!isNaN(savedColorIndex)) currentColorIndex = savedColorIndex;
+if (!isNaN(savedClickCounter)) colorClickCounter = savedClickCounter;
+if (!isNaN(savedColorIndex)) {
+    const lastColorObj = sequenceColors[savedColorIndex];
+    applyColorToBackground(lastColorObj.bg);
+}
+
+// ---------------- פונקציות ----------------
 function getRandomDigit(){
     let digit;
     do { digit = Math.floor(Math.random()*10); } while(lastDigits.includes(digit));
@@ -91,6 +132,11 @@ function getNextColor(){
         currentColorIndex++;
         if(currentColorIndex>=sequenceColors.length) currentColorIndex=0;
     }
+
+    // שמירה ב־cookies
+    setCookie("colorIndex", currentColorIndex);
+    setCookie("colorClickCounter", colorClickCounter);
+
     return colorObj;
 }
 
@@ -119,9 +165,9 @@ function generateRandomDigit(){
     // רקע
     applyColorToBackground(colorObj.bg);
 
-    // טקסט ופונט
+    // טקסט + פונט
     digitDisplay.className='digit-display animate';
-    if(randomFont) digitDisplay.style.fontFamily=randomFont;
+    if(randomFont) digitDisplay.classList.add(randomFont);
 
     if(colorObj.color==='rainbow'){
         digitDisplay.style.background='linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
@@ -151,6 +197,7 @@ function playAudio(){
     setTimeout(()=>{ if(readBtn.disabled) readBtn.disabled=false; },3000);
 }
 
+// מניעת זום כפול בטאצ'
 document.addEventListener('touchstart',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
 let lastTouchEnd=0;
 document.addEventListener('touchend',e=>{ const now=(new Date()).getTime(); if(now-lastTouchEnd<=300)e.preventDefault(); lastTouchEnd=now; },false);
