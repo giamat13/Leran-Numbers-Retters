@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ספרות רנדומליות</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -22,121 +18,102 @@
         }
 
         .digit-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
+            flex:1;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            width:100%;
         }
 
         .digit-display {
             font-size: 15rem;
             font-weight: bold;
-            color: white;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            color:white;
+            text-shadow:0 0 30px rgba(255,255,255,0.5);
             transition: all 0.3s ease;
-            user-select: none;
+            user-select:none;
         }
 
         .digit-display.animate {
             transform: scale(1.2);
-            text-shadow: 0 0 50px rgba(255, 255, 255, 0.8);
+            text-shadow:0 0 50px rgba(255,255,255,0.8);
         }
 
         .button-container {
-            padding: 60px 20px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
+            padding:60px 20px;
+            width:100%;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:15px;
         }
 
         .generate-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            padding: 20px 40px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg,#ff6b6b,#ee5a24);
+            border:none;
+            border-radius:50px;
+            color:white;
+            font-size:1.5rem;
+            font-weight:bold;
+            padding:20px 40px;
+            cursor:pointer;
+            box-shadow:0 10px 30px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
-            user-select: none;
-            min-width: 200px;
+            user-select:none;
+            min-width:200px;
         }
 
-        .generate-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .generate-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
+        .generate-btn:hover { transform:translateY(-3px); box-shadow:0 15px 40px rgba(0,0,0,0.4);}
+        .generate-btn:active { transform:translateY(0); box-shadow:0 5px 20px rgba(0,0,0,0.3);}
 
         .read-btn {
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            font-size: 1.3rem;
-            font-weight: bold;
-            padding: 15px 30px;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg,#4ecdc4,#44a08d);
+            border:none;
+            border-radius:50px;
+            color:white;
+            font-size:1.3rem;
+            font-weight:bold;
+            padding:15px 30px;
+            cursor:pointer;
+            box-shadow:0 8px 25px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
-            user-select: none;
-            min-width: 160px;
-            opacity: 0;
-            transform: translateY(20px);
-            visibility: hidden;
+            user-select:none;
+            min-width:160px;
+            opacity:0;
+            transform:translateY(20px);
+            visibility:hidden;
         }
 
-        .read-btn.show {
-            opacity: 1;
-            transform: translateY(0);
-            visibility: visible;
-        }
-
-        .read-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .read-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
+        .read-btn.show { opacity:1; transform:translateY(0); visibility:visible;}
+        .read-btn:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,0.4);}
+        .read-btn:active { transform:translateY(0); box-shadow:0 4px 15px rgba(0,0,0,0.3);}
 
         .welcome-text {
-            color: white;
-            font-size: 1.2rem;
-            text-align: center;
-            opacity: 0.8;
-            margin-top: 50px;
+            color:white;
+            font-size:1.2rem;
+            text-align:center;
+            opacity:0.8;
+            margin-top:50px;
         }
 
-        @media (max-width: 480px) {
-            .digit-display { font-size: 12rem; }
-            .generate-btn { font-size: 1.3rem; padding: 18px 35px; min-width: 180px; }
-            .read-btn { font-size: 1.1rem; padding: 12px 25px; min-width: 140px; }
-            .welcome-text { font-size: 1rem; margin-top: 30px; }
-            .button-container { padding: 70px 20px; }
+        @media(max-width:480px){
+            .digit-display{ font-size:12rem;}
+            .generate-btn{ font-size:1.3rem; padding:18px 35px; min-width:180px;}
+            .read-btn{ font-size:1.1rem; padding:12px 25px; min-width:140px;}
+            .welcome-text{ font-size:1rem; margin-top:30px;}
+            .button-container{ padding:70px 20px;}
         }
 
-        @media (max-width: 320px) {
-            .digit-display { font-size: 10rem; }
-            .generate-btn { font-size: 1.2rem; padding: 15px 30px; min-width: 160px; }
-            .read-btn { font-size: 1rem; padding: 10px 20px; min-width: 120px; }
-            .button-container { padding: 80px 20px; }
+        @media(max-width:320px){
+            .digit-display{ font-size:10rem;}
+            .generate-btn{ font-size:1.2rem; padding:15px 30px; min-width:160px;}
+            .read-btn{ font-size:1rem; padding:10px 20px; min-width:120px;}
+            .button-container{ padding:80px 20px;}
         }
 
-        .generate-btn:disabled, .read-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
+        .generate-btn:disabled, .read-btn:disabled{
+            opacity:0.7;
+            cursor:not-allowed;
         }
     </style>
 </head>
@@ -162,16 +139,16 @@
         let currentDigit = null;
         let fontClasses = [];
 
-        // טען את רשימת הפונטים מתוך fonts.txt
+        // טען את רשימת הפונטים מתוך fonts.txt (כל שורה = פונט)
         fetch('fonts.txt')
             .then(response => response.text())
             .then(data => {
-                fontClasses = data.split(',').map(f => f.trim().replace(/['"]/g, ''));
+                fontClasses = data.split('\n')
+                                  .map(f => f.trim())
+                                  .filter(f => f);
                 console.log('Fonts loaded:', fontClasses);
             })
-            .catch(err => {
-                console.error('Error loading fonts.txt:', err);
-            });
+            .catch(err => console.error('Error loading fonts.txt:', err));
 
         let lastDigits = [];
         let lastFonts = [];
@@ -214,7 +191,7 @@
             const randomFont = getRandomFont();
 
             digitDisplay.className = 'digit-display animate';
-            if (randomFont) digitDisplay.style.fontFamily = randomFont;
+            if(randomFont) digitDisplay.style.fontFamily = randomFont;
             digitDisplay.textContent = randomDigit;
 
             readBtn.classList.add('show');
@@ -226,7 +203,7 @@
         }
 
         function playAudio() {
-            if (currentDigit === null) return;
+            if(currentDigit === null) return;
             const readBtn = document.getElementById('readBtn');
             readBtn.disabled = true;
             const audio = new Audio(`${currentDigit}.mp3`);
@@ -245,20 +222,18 @@
                 readBtn.disabled = false;
             };
 
-            setTimeout(() => {
-                if (readBtn.disabled) readBtn.disabled = false;
-            }, 3000);
+            setTimeout(() => { if(readBtn.disabled) readBtn.disabled = false; }, 3000);
         }
 
         // למניעת זום כפול בטלפון
-        document.addEventListener('touchstart', function(event) {
-            if (event.touches.length > 1) event.preventDefault();
-        }, { passive: false });
+        document.addEventListener('touchstart', function(event){
+            if(event.touches.length > 1) event.preventDefault();
+        }, { passive:false });
 
         let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
+        document.addEventListener('touchend', function(event){
             const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) event.preventDefault();
+            if(now - lastTouchEnd <= 300) event.preventDefault();
             lastTouchEnd = now;
         }, false);
     </script>
