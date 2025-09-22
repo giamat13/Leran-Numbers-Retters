@@ -1,241 +1,166 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ספרות רנדומליות</title>
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .digit-container {
-            flex:1;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            width:100%;
-        }
-
-        .digit-display {
-            font-size: 15rem;
-            font-weight: bold;
-            color:white;
-            text-shadow:0 0 30px rgba(255,255,255,0.5);
-            transition: all 0.3s ease;
-            user-select:none;
-        }
-
-        .digit-display.animate {
-            transform: scale(1.2);
-            text-shadow:0 0 50px rgba(255,255,255,0.8);
-        }
-
-        .button-container {
-            padding:60px 20px;
-            width:100%;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap:15px;
-        }
-
-        .generate-btn {
-            background: linear-gradient(45deg,#ff6b6b,#ee5a24);
-            border:none;
-            border-radius:50px;
-            color:white;
-            font-size:1.5rem;
-            font-weight:bold;
-            padding:20px 40px;
-            cursor:pointer;
-            box-shadow:0 10px 30px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            user-select:none;
-            min-width:200px;
-        }
-
-        .generate-btn:hover { transform:translateY(-3px); box-shadow:0 15px 40px rgba(0,0,0,0.4);}
-        .generate-btn:active { transform:translateY(0); box-shadow:0 5px 20px rgba(0,0,0,0.3);}
-
-        .read-btn {
-            background: linear-gradient(45deg,#4ecdc4,#44a08d);
-            border:none;
-            border-radius:50px;
-            color:white;
-            font-size:1.3rem;
-            font-weight:bold;
-            padding:15px 30px;
-            cursor:pointer;
-            box-shadow:0 8px 25px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            user-select:none;
-            min-width:160px;
-            opacity:0;
-            transform:translateY(20px);
-            visibility:hidden;
-        }
-
-        .read-btn.show { opacity:1; transform:translateY(0); visibility:visible;}
-        .read-btn:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,0.4);}
-        .read-btn:active { transform:translateY(0); box-shadow:0 4px 15px rgba(0,0,0,0.3);}
-
-        .welcome-text {
-            color:white;
-            font-size:1.2rem;
-            text-align:center;
-            opacity:0.8;
-            margin-top:50px;
-        }
-
-        @media(max-width:480px){
-            .digit-display{ font-size:12rem;}
-            .generate-btn{ font-size:1.3rem; padding:18px 35px; min-width:180px;}
-            .read-btn{ font-size:1.1rem; padding:12px 25px; min-width:140px;}
-            .welcome-text{ font-size:1rem; margin-top:30px;}
-            .button-container{ padding:70px 20px;}
-        }
-
-        @media(max-width:320px){
-            .digit-display{ font-size:10rem;}
-            .generate-btn{ font-size:1.2rem; padding:15px 30px; min-width:160px;}
-            .read-btn{ font-size:1rem; padding:10px 20px; min-width:120px;}
-            .button-container{ padding:80px 20px;}
-        }
-
-        .generate-btn:disabled, .read-btn:disabled{
-            opacity:0.7;
-            cursor:not-allowed;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ספרות רנדומליות עם צבעים</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{height:100vh;display:flex;flex-direction:column;justify-content:space-between;align-items:center;overflow:hidden;transition:background 0.5s ease;}
+.digit-container{flex:1;display:flex;justify-content:center;align-items:center;width:100%;}
+.digit-display{font-size:15rem;font-weight:bold;color:white;text-shadow:0 0 30px rgba(0,0,0,0.5);transition: all 0.3s ease;user-select:none;}
+.digit-display.animate{transform:scale(1.2);text-shadow:0 0 50px rgba(0,0,0,0.8);}
+.button-container{padding:60px 20px;width:100%;display:flex;flex-direction:column;align-items:center;gap:15px;}
+.generate-btn{background:linear-gradient(45deg,#ff6b6b,#ee5a24);border:none;border-radius:50px;color:white;font-size:1.5rem;font-weight:bold;padding:20px 40px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,0.3);transition:all 0.3s ease;min-width:200px;}
+.generate-btn:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(0,0,0,0.4);}
+.generate-btn:active{transform:translateY(0);box-shadow:0 5px 20px rgba(0,0,0,0.3);}
+.read-btn{background:linear-gradient(45deg,#4ecdc4,#44a08d);border:none;border-radius:50px;color:white;font-size:1.3rem;font-weight:bold;padding:15px 30px;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,0.3);transition:all 0.3s ease;min-width:160px;opacity:0;transform:translateY(20px);visibility:hidden;}
+.read-btn.show{opacity:1;transform:translateY(0);visibility:visible;}
+.read-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,0.4);}
+.read-btn:active{transform:translateY(0);box-shadow:0 4px 15px rgba(0,0,0,0.3);}
+.welcome-text{color:white;font-size:1.2rem;text-align:center;opacity:0.8;margin-top:50px;}
+@media(max-width:480px){.digit-display{font-size:12rem;}.generate-btn{font-size:1.3rem;padding:18px 35px;min-width:180px;}.read-btn{font-size:1.1rem;padding:12px 25px;min-width:140px;}.welcome-text{font-size:1rem;margin-top:30px;}.button-container{padding:70px 20px;}}
+@media(max-width:320px){.digit-display{font-size:10rem;}.generate-btn{font-size:1.2rem;padding:15px 30px;min-width:160px;}.read-btn{font-size:1rem;padding:10px 20px;min-width:120px;}.button-container{padding:80px 20px;}}
+@keyframes blink {0%,100%{opacity:1;}50%{opacity:0.5;}}
+</style>
 </head>
 <body>
-    <div class="digit-container">
-        <div id="digitDisplay" class="digit-display">
-            <div class="welcome-text">לחץ על הכפתור לספרה רנדומלית</div>
-        </div>
+<div class="digit-container">
+    <div id="digitDisplay" class="digit-display">
+        <div class="welcome-text">לחץ על הכפתור לספרה רנדומלית</div>
     </div>
+</div>
+<div class="button-container">
+    <button id="generateBtn" class="generate-btn" onclick="generateRandomDigit()">ספרה רנדומלית</button>
+    <button id="readBtn" class="read-btn" onclick="playAudio()">🔊 הקרא</button>
+</div>
+<script>
+let isFirstClick = true;
+let currentDigit = null;
+let fontClasses = [];
+let lastDigits = [];
+let lastFonts = [];
+let currentColorIndex = 0;
+let colorClickCounter = 0;
 
-    <div class="button-container">
-        <button id="generateBtn" class="generate-btn" onclick="generateRandomDigit()">
-            ספרה רנדומלית
-        </button>
-        
-        <button id="readBtn" class="read-btn" onclick="playAudio()">
-            🔊 הקרא
-        </button>
-    </div>
+// סדר הצבעים לפי הרשימה שלך
+const sequenceColors = [
+    {color:'#ff6b6b', bg:'#6a6fd5'},
+    {color:'#ffbe76', bg:'#ff6b6b'},
+    {color:'#f6e58d', bg:'#ffbe76'},
+    {color:'#44a08d', bg:'#f6e58d'},
+    {color:'#4ecdc4', bg:'#44a08d'},
+    {color:'#686de0', bg:'#4ecdc4'},
+    {color:'#ff7979', bg:'#686de0'},
+    {color:'#e056fd', bg:'#ff7979'},
+    {color:'#ff7979', bg:'#e056fd'},
+    {color:'#ffbe76', bg:'#ff7979'},
+    {color:'#f6e58d', bg:'#ffbe76'},
+    {color:'#ffbe00', bg:'#f6e58d'},
+    {color:'rainbow', bg:'#ffbe00'},
+    {color:'rainbow-blink', bg:'#ffbe00'}
+];
 
-    <script>
-        let isFirstClick = true;
-        let currentDigit = null;
-        let fontClasses = [];
+// טוען את הפונטים מקובץ fonts.txt
+fetch('fonts.txt')
+    .then(resp => resp.text())
+    .then(data => { fontClasses = data.split('\n').map(f=>f.trim()).filter(f=>f); })
+    .catch(err => console.error('Error loading fonts.txt:', err));
 
-        // טען את רשימת הפונטים מתוך fonts.txt (כל שורה = פונט)
-        fetch('fonts.txt')
-            .then(response => response.text())
-            .then(data => {
-                fontClasses = data.split('\n')
-                                  .map(f => f.trim())
-                                  .filter(f => f);
-                console.log('Fonts loaded:', fontClasses);
-            })
-            .catch(err => console.error('Error loading fonts.txt:', err));
+function getRandomDigit(){
+    let digit;
+    do { digit = Math.floor(Math.random()*10); } while(lastDigits.includes(digit));
+    lastDigits.push(digit);
+    if(lastDigits.length>5) lastDigits.shift();
+    return digit;
+}
 
-        let lastDigits = [];
-        let lastFonts = [];
+function getRandomFont(){
+    if(fontClasses.length===0) return '';
+    let font;
+    do { font = fontClasses[Math.floor(Math.random()*fontClasses.length)]; } 
+    while(lastFonts.includes(font) && lastFonts.length<fontClasses.length);
+    lastFonts.push(font);
+    if(lastFonts.length>10) lastFonts.shift();
+    return font;
+}
 
-        function getRandomDigit() {
-            let digit;
-            do {
-                digit = Math.floor(Math.random() * 10);
-            } while (lastDigits.includes(digit));
-            lastDigits.push(digit);
-            if (lastDigits.length > 5) lastDigits.shift();
-            return digit;
-        }
+function getNextColor(){
+    const colorObj = sequenceColors[currentColorIndex];
+    colorClickCounter++;
+    if(colorClickCounter>=10){
+        colorClickCounter=0;
+        currentColorIndex++;
+        if(currentColorIndex>=sequenceColors.length) currentColorIndex=0;
+    }
+    return colorObj;
+}
 
-        function getRandomFont() {
-            if (fontClasses.length === 0) return '';
-            let font;
-            do {
-                font = fontClasses[Math.floor(Math.random() * fontClasses.length)];
-            } while (lastFonts.includes(font) && lastFonts.length < fontClasses.length);
-            lastFonts.push(font);
-            if (lastFonts.length > 10) lastFonts.shift();
-            return font;
-        }
+function applyColorToBackground(bg){
+    const body = document.body;
+    if(bg === 'rainbow'){
+        body.style.background='linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
+    } else {
+        body.style.background=bg;
+    }
+}
 
-        function generateRandomDigit() {
-            const digitDisplay = document.getElementById('digitDisplay');
-            const generateBtn = document.getElementById('generateBtn');
-            const readBtn = document.getElementById('readBtn');
+function generateRandomDigit(){
+    const digitDisplay = document.getElementById('digitDisplay');
+    const generateBtn = document.getElementById('generateBtn');
+    const readBtn = document.getElementById('readBtn');
 
-            if (isFirstClick) {
-                digitDisplay.innerHTML = '';
-                isFirstClick = false;
-            }
+    if(isFirstClick){ digitDisplay.innerHTML=''; isFirstClick=false; }
+    generateBtn.disabled=true;
 
-            generateBtn.disabled = true;
+    const randomDigit = getRandomDigit();
+    currentDigit = randomDigit;
+    const randomFont = getRandomFont();
+    const colorObj = getNextColor();
 
-            const randomDigit = getRandomDigit();
-            currentDigit = randomDigit;
-            const randomFont = getRandomFont();
+    // רקע
+    applyColorToBackground(colorObj.bg);
 
-            digitDisplay.className = 'digit-display animate';
-            if(randomFont) digitDisplay.style.fontFamily = randomFont;
-            digitDisplay.textContent = randomDigit;
+    // טקסט ופונט
+    digitDisplay.className='digit-display animate';
+    if(randomFont) digitDisplay.style.fontFamily=randomFont;
 
-            readBtn.classList.add('show');
+    if(colorObj.color==='rainbow'){
+        digitDisplay.style.background='linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
+        digitDisplay.style.webkitBackgroundClip='text';
+        digitDisplay.style.color='transparent';
+        digitDisplay.style.animation='';
+    } else if(colorObj.color==='rainbow-blink'){
+        digitDisplay.style.background='linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
+        digitDisplay.style.webkitBackgroundClip='text';
+        digitDisplay.style.color='transparent';
+        digitDisplay.style.animation='blink 1s infinite';
+    } else {
+        digitDisplay.style.color=colorObj.color;
+        digitDisplay.style.background='';
+        digitDisplay.style.animation='';
+    }
 
-            setTimeout(() => {
-                digitDisplay.classList.remove('animate');
-                generateBtn.disabled = false;
-            }, 300);
-        }
+    digitDisplay.textContent=randomDigit;
+    readBtn.classList.add('show');
 
-        function playAudio() {
-            if(currentDigit === null) return;
-            const readBtn = document.getElementById('readBtn');
-            readBtn.disabled = true;
-            const audio = new Audio(`${currentDigit}.mp3`);
+    setTimeout(()=>{ digitDisplay.classList.remove('animate'); generateBtn.disabled=false; },300);
+}
 
-            audio.oncanplaythrough = function() {
-                audio.play().catch(error => {
-                    console.error('שגיאה בניגון השמע:', error);
-                    alert('לא ניתן לנגן את קובץ השמע. ודא שקובץ ' + currentDigit + '.mp3 קיים בתקייה.');
-                });
-            };
+function playAudio(){
+    if(currentDigit===null) return;
+    const readBtn=document.getElementById('readBtn');
+    readBtn.disabled=true;
+    const audio=new Audio(`${currentDigit}.mp3`);
+    audio.oncanplaythrough=function(){ audio.play().catch(err=>{ alert('שגיאה בניגון השמע'); readBtn.disabled=false; }); };
+    audio.onended=function(){ readBtn.disabled=false; };
+    audio.onerror=function(){ alert('שגיאה בטעינת השמע'); readBtn.disabled=false; };
+    setTimeout(()=>{ if(readBtn.disabled) readBtn.disabled=false; },3000);
+}
 
-            audio.onended = function() { readBtn.disabled = false; };
-            audio.onerror = function() {
-                console.error('שגיאה בטעינת קובץ השמע:', currentDigit + '.mp3');
-                alert('לא ניתן לטעון את קובץ השמע. ודא שקובץ ' + currentDigit + '.mp3 קיים בתקייה.');
-                readBtn.disabled = false;
-            };
-
-            setTimeout(() => { if(readBtn.disabled) readBtn.disabled = false; }, 3000);
-        }
-
-        // למניעת זום כפול בטלפון
-        document.addEventListener('touchstart', function(event){
-            if(event.touches.length > 1) event.preventDefault();
-        }, { passive:false });
-
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event){
-            const now = (new Date()).getTime();
-            if(now - lastTouchEnd <= 300) event.preventDefault();
-            lastTouchEnd = now;
-        }, false);
-    </script>
+document.addEventListener('touchstart',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
+let lastTouchEnd=0;
+document.addEventListener('touchend',e=>{ const now=(new Date()).getTime(); if(now-lastTouchEnd<=300)e.preventDefault(); lastTouchEnd=now; },false);
+</script>
 </body>
 </html>
