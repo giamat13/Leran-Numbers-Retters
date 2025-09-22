@@ -1,216 +1,117 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ספרות רנדומליות</title>
+  <title>קורא מספרים</title>
   <style>
     body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      overflow: hidden;
+      text-align: center;
+      font-size: 48px;
+      transition: background 0.5s, color 0.5s;
+      margin-top: 100px;
     }
-
-    .digit-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
+    #number {
+      font-size: 120px;
+      margin: 20px;
     }
-
-    .digit-display {
-      font-size: 15rem;
-      font-weight: bold;
-      color: white;
-      text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-      transition: all 0.3s ease;
-      user-select: none;
-    }
-
-    .digit-display.animate {
-      transform: scale(1.2);
-      text-shadow: 0 0 50px rgba(255, 255, 255, 0.8);
-    }
-
-    .button-container {
-      padding: 60px 20px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .generate-btn {
-      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-      border: none;
-      border-radius: 50px;
-      color: white;
-      font-size: 1.5rem;
-      font-weight: bold;
-      padding: 20px 40px;
+    button {
+      font-size: 24px;
+      padding: 10px 20px;
       cursor: pointer;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
-      user-select: none;
-      min-width: 200px;
     }
-
-    .generate-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    /* מחלקות מיוחדות לאנימציות */
+    .rainbow {
+      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
+      background-size: 1400% 1400%;
+      animation: rainbow 10s ease infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-
-    .read-btn {
-      background: linear-gradient(45deg, #4ecdc4, #44a08d);
-      border: none;
-      border-radius: 50px;
-      color: white;
-      font-size: 1.3rem;
-      font-weight: bold;
-      padding: 15px 30px;
-      cursor: pointer;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
-      user-select: none;
-      min-width: 160px;
-      opacity: 0;
-      transform: translateY(20px);
-      visibility: hidden;
-    }
-
-    .read-btn.show {
-      opacity: 1;
-      transform: translateY(0);
-      visibility: visible;
+    @keyframes rainbow {
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
     }
   </style>
 </head>
 <body>
-  <div class="digit-container">
-    <div id="digitDisplay" class="digit-display">
-      <div class="welcome-text">לחץ על הכפתור לספרה רנדומלית</div>
-    </div>
-  </div>
-
-  <div class="button-container">
-    <button id="generateBtn" class="generate-btn" onclick="generateRandomDigit()">
-      ספרה רנדומלית
-    </button>
-    
-    <button id="readBtn" class="read-btn" onclick="playAudio()">
-      🔊 הקרא
-    </button>
-  </div>
+  <div id="number">0</div>
+  <button onclick="nextNumber()">הקרא</button>
 
   <script>
-    let isFirstClick = true;
-    let currentDigit = null;
+    let current = 0;
+    let clickCount = 0;
 
-    let fontClasses = []; // נטען מ־fonts.txt
-    fetch("fonts.txt")
-      .then(res => res.text())
-      .then(text => {
-        fontClasses = text.split(",").map(f => f.trim().replace(/['"]+/g, ""));
-      })
-      .catch(err => console.error("שגיאה בטעינת fonts.txt:", err));
-
-    // סדר הצבעים עם רקעים מדויקים
-    const sequenceColors = [
-      {color: "#ff6b6b", background: "#6a6fd5"},
-      {color: "#ffbe76", background: "#ff6b6b"},
-      {color: "#f6e58d", background: "#ffbe76"},
-      {color: "#44a08d", background: "#f6e58d"},
-      {color: "#4ecdc4", background: "#44a08d"},
-      {color: "#686de0", background: "#4ecdc4"},
-      {color: "#ff7979", background: "#686de0"},
-      {color: "#e056fd", background: "#ff7979"},
-      {color: "#ff7979", background: "#e056fd"},
-      {color: "#ffbe76", background: "#ff7979"},
-      {color: "#f6e58d", background: "#ffbe76"},
-      {color: "#ffbe00", background: "#f6e58d"},
-      {color: "rainbow", background: "#ffbe00"}
+    // רשימת צבעים + רקעים (כל אחד נשאר ל־10 לחיצות)
+    const colorCycle = [
+      {color: "#ff6b6b", background: "#6a6fd5"}, // אדום/כתום – רקע: סגול
+      {color: "#ffbe76", background: "#ff6b6b"}, // כתום/צהוב – רקע: אדום
+      {color: "#f6e58d", background: "#ffbe76"}, // צהוב – רקע: כתום
+      {color: "#44a08d", background: "#f6e58d"}, // ירוק כהה – רקע: צהוב
+      {color: "#4ecdc4", background: "#44a08d"}, // טורקיז – רקע: ירוק
+      {color: "#686de0", background: "#4ecdc4"}, // כחול סגול – רקע: טורקיז
+      {color: "#ff7979", background: "#686de0"}, // ורוד – רקע: כחול
+      {color: "#e056fd", background: "#ff7979"}, // סגול – רקע: ורוד
+      {color: "#ff7979", background: "#e056fd"}, // ורוד – רקע: סגול
+      {color: "#ffbe76", background: "#ff7979"}, // ארד – רקע: ורוד
+      {color: "#f6e58d", background: "#ffbe76"}, // כסף – רקע: ארד
+      {color: "#ffbe00", background: "#f6e58d"}, // זהב – רקע: כסף
+      {color: "rainbow", background: "#ffbe00"}  // קשת בענן – רקע: זהב
     ];
 
-    let currentColorIndex = 0;
-    let colorClickCounter = 0;
+    let fonts = [];
 
-    function getNextColor(){
-      const colorObj = sequenceColors[currentColorIndex];
-      colorClickCounter++;
-      if(colorClickCounter >= 10){
-        colorClickCounter = 0;
-        currentColorIndex++;
-        if(currentColorIndex >= sequenceColors.length) currentColorIndex = 0;
-      }
-      return colorObj;
-    }
+    // טעינת הפונטים מ־fonts.txt
+    fetch('fonts.txt')
+      .then(r => r.text())
+      .then(txt => {
+        fonts = txt.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      });
 
-    function getRandomDigit() {
-      return Math.floor(Math.random() * 10);
-    }
+    function applyRandomFont() {
+      if (fonts.length === 0) return;
 
-    function getRandomFont() {
-      if (fontClasses.length === 0) return "";
-      const randomIndex = Math.floor(Math.random() * fontClasses.length);
-      return fontClasses[randomIndex];
-    }
+      const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
 
-    function generateRandomDigit() {
-      const digitDisplay = document.getElementById('digitDisplay');
-      const generateBtn = document.getElementById('generateBtn');
-      const readBtn = document.getElementById('readBtn');
-
-      if (isFirstClick) {
-        digitDisplay.innerHTML = '';
-        isFirstClick = false;
+      // מוסיפים את ההגדרה כ־<style> אם לא קיים
+      if (!document.getElementById(randomFont)) {
+        const style = document.createElement("style");
+        style.id = randomFont;
+        style.textContent = randomFont;
+        document.head.appendChild(style);
       }
 
-      generateBtn.disabled = true;
+      // שם המחלקה מתוך ההגדרה (למשל .font-franklin → font-franklin)
+      const cls = randomFont.split('{')[0].trim().replace('.', '');
+      document.body.className = cls;
+    }
 
-      const randomDigit = getRandomDigit();
-      currentDigit = randomDigit;
+    function applyColor() {
+      const index = Math.floor(clickCount / 10) % colorCycle.length;
+      const scheme = colorCycle[index];
+      const numberEl = document.getElementById("number");
 
-      const randomFont = getRandomFont();
-      const {color, background} = getNextColor();
-
-      // צבע רגיל
-      if (color !== "rainbow") {
-        digitDisplay.className = 'digit-display animate ' + randomFont;
-        digitDisplay.style.color = color;
-        document.body.style.background = background;
+      if (scheme.color === "rainbow") {
+        numberEl.className = "rainbow";
+        document.body.style.background = scheme.background;
       } else {
-        // קשת בענן
-        digitDisplay.className = 'digit-display animate ' + randomFont;
-        digitDisplay.style.color = "transparent";
-        digitDisplay.style.backgroundImage = "linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)";
-        digitDisplay.style.webkitBackgroundClip = "text";
-        digitDisplay.style.backgroundClip = "text";
-        document.body.style.background = "#ffbe00"; // רקע של הצבע הקודם
+        numberEl.className = "";
+        numberEl.style.color = scheme.color;
+        document.body.style.background = scheme.background;
       }
-
-      digitDisplay.textContent = randomDigit;
-
-      readBtn.classList.add('show');
-
-      setTimeout(() => {
-        digitDisplay.classList.remove('animate');
-        generateBtn.disabled = false;
-      }, 300);
     }
 
-    function playAudio() {
-      if (currentDigit === null) return;
-      const readBtn = document.getElementById('readBtn');
-      readBtn.disabled = true;
+    function nextNumber() {
+      current++;
+      clickCount++;
 
-      const audio = new Audio(`${currentDigit}.mp3`);
-      audio.play().finally(() => readBtn.disabled = false);
+      document.getElementById("number").textContent = current;
+      applyColor();
+      applyRandomFont();
+
+      // לנגן קובץ mp3 אם יש
+      const audio = new Audio(current % 10 + ".mp3");
+      audio.play();
     }
   </script>
 </body>
