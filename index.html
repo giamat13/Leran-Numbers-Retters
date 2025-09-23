@@ -7,94 +7,151 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{height:100vh;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;overflow:hidden;font-family:Arial,sans-serif;transition:background 0.5s;}
-#colorBar{width:100%;height:20px;margin-bottom:10px;border-radius:5px;transition:background 0.5s;}
+#topBar{width:100%;display:flex;justify-content:space-between;align-items:center;padding:5px;}
+#colorBar{height:20px;border-radius:5px;transition:width 0.3s, background 0.5s;width:0%;}
+#switchModeBtn{margin-right:10px;background:#2196f3;color:white;border:none;padding:5px 12px;border-radius:8px;cursor:pointer;}
 #colorSquare{width:200px;height:200px;margin:20px auto;display:flex;justify-content:center;align-items:center;border-radius:20px;box-shadow:0 5px 15px rgba(0,0,0,0.3);font-size:72px;color:white;text-shadow:2px 2px 4px rgba(0,0,0,0.5);transition:transform 0.3s, box-shadow 0.3s;}
 #colorSquare:hover{transform:scale(1.05);}
 button{padding:12px 24px;font-size:18px;margin:5px;color:white;border:none;border-radius:10px;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,0.2);transition:background-color 0.3s, transform 0.1s;}
-#foundButton{background-color:#ff9800;}#foundButton:hover{background-color:#fb8c00;}#foundButton:active{transform:scale(0.95);background-color:#f57c00;}
+#foundButton{background-color:#ff9800;}#foundButton:hover{background-color:#fb8c00;}
 #foundAllButton{background-color:#ff5252;}#foundAllButton:hover{background-color:#ff1744;}
 #skipButton{background-color:#9e9e9e;}#skipButton:hover{background-color:#757575;}
 #readBtn{background-color:#4ecdc4;}#readBtn:hover{background-color:#44a08d;}
+#nextBtn{background-color:#8e44ad;}#nextBtn:hover{background-color:#732d91;}
 #message,#clickCount,#score,#timer{margin-top:10px;font-size:22px;font-weight:bold;}
 .confetti{position:absolute;pointer-events:none;animation:fall linear forwards;}
-@keyframes jumpAnim{0%{transform:translateY(0);}50%{transform:translateY(-20px);}100%{transform:translateY(0);}}
-@keyframes flashAnim{0%{box-shadow:0 0 15px 5px yellow;}50%{box-shadow:0 0 25px 10px orange;}100%{box-shadow:0 0 15px 5px yellow;}}
+/* Overlay בחירת מצב */
+#modeOverlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.7);
+  display:flex;justify-content:center;align-items:center;z-index:1000;
+}
+#modeBox{
+  background:white;padding:30px;border-radius:12px;text-align:center;
+}
+#modeBox h2{margin-bottom:20px;}
+.modeBtn{
+  margin:10px;padding:12px 24px;font-size:20px;border:none;border-radius:10px;cursor:pointer;
+}
+#chooseFind{background:#ff9800;color:white;}
+#chooseLearn{background:#4ecdc4;color:white;}
 </style>
 </head>
 <body>
-<div id="colorBar"></div>
-<h1>מצא את הפריט בצבע!</h1>
-<div id="colorSquare">מצאתי✋</div>
-<div>
+<div id="topBar">
+  <div id="colorBar"></div>
+  <button id="switchModeBtn">החלף מצב</button>
+</div>
+
+<h1>מצא או למד את המספר!</h1>
+<div id="colorSquare">✋</div>
+<div id="buttonsArea">
   <button id="foundButton">מצאתי✋</button>
   <button id="foundAllButton">מצאתי הכל ✋✋✋</button>
   <button id="skipButton">דלג</button>
   <button id="readBtn">🔊 הקרא</button>
+  <button id="nextBtn" style="display:none;">➡️ העבר</button>
 </div>
+
 <p id="clickCount">לחצת: 0 פעמים</p>
 <p id="score">נקודות: 0</p>
 <p id="timer">זמן: 0 שניות</p>
 <p id="message"></p>
 
+<!-- Overlay בחירת מצב -->
+<div id="modeOverlay">
+  <div id="modeBox">
+    <h2>בחר מצב משחק:</h2>
+    <button id="chooseFind" class="modeBtn">🔎 מצא</button>
+    <button id="chooseLearn" class="modeBtn">📖 למד</button>
+  </div>
+</div>
+
 <script>
-// רקעים לפי סדר
-const backgrounds = [
-  '#6a6fd5', // כחול
-  '#ff6b6b', // אדום
-  '#44a08d', // טורקיז
-  '#f6e58d', // צהוב
-  '#cd7f32', // ארד
-  '#c0c0c0', // כסף
-  '#ffd700', // זהב
-  'rainbow' // קשת
-];
+// ---- רקעים ----
+const backgrounds = ['#6a6fd5','#ff6b6b','#44a08d','#f6e58d','#cd7f32','#c0c0c0','#ffd700','rainbow'];
+const squareColors = ['#ff6b6b','#44a08d','#f6e58d'];
 
-// צבעי הריבוע והסרגל לפי סדר
-const squareColors = ['#ff6b6b','#44a08d','#f6e58d','#ff6b6b','#44a08d','#f6e58d'];
-
+// ---- משתנים ----
 let bgIndex = 0, stageIndex = 0;
-let totalItems, foundCount=0, startTime, score=parseInt(getCookie('score'))||0;
+let totalItems, foundCount=0, startTime;
+let score=parseInt(getCookie('score'))||0;
 let clickCounterForConfetti=0;
 let currentSquareColor='';
+let gameMode = getCookie('gameMode') || "";
 
-// פונקציות קוביות
-function setCookie(name,value,days=7){const d=new Date();d.setTime(d.getTime()+(days*24*60*60*1000));document.cookie=name+'='+value+';expires='+d.toUTCString()+';path=/';}
-function getCookie(name){let match=document.cookie.match(new RegExp('(^| )'+name+'=([^;]+)'));if(match)return parseInt(match[2]);return 0;}
+// ---- cookies ----
+function setCookie(name,value,days=7){
+  const d=new Date();
+  d.setTime(d.getTime()+(days*24*60*60*1000));
+  document.cookie=name+'='+value+';expires='+d.toUTCString()+';path=/';
+}
+function getCookie(name){
+  let match=document.cookie.match(new RegExp('(^| )'+name+'=([^;]+)'));
+  if(match) return match[2];
+  return "";
+}
+
+// ---- עדכון ניקוד ----
 function updateScoreDisplay(){document.getElementById('score').innerText='נקודות: '+score;}
-updateScoreDisplay();
 
-function getRandomDigit(){return Math.floor(Math.random()*10);}
-function applyBackground(bg){document.body.style.background = bg==='rainbow'?'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)':bg;}
-
+// ---- מספר אקראי ----
+function getRandomDigit(){return Math.floor(Math.random()*9)+1;}
+function applyBackground(bg){
+  document.body.style.background = bg==='rainbow'
+    ? 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)'
+    : bg;
+}
 function pickColorForBar(){
   const color = squareColors[stageIndex % squareColors.length];
   currentSquareColor = color;
   document.getElementById('colorBar').style.backgroundColor = color;
 }
 
-// הפעלת סיבוב חדש (מספר חדש בלבד)
+// ---- Progress Bar ----
+function updateProgressBar(){
+  const progress = (clickCounterForConfetti / 15) * 100;
+  document.getElementById('colorBar').style.width = progress + '%';
+}
+
+// ---- סיבוב ----
 function startRound(){
   const square=document.getElementById('colorSquare');
-  let digit = getRandomDigit(); if(digit===0) digit=1;
-  square.textContent = digit;
-  totalItems = parseInt(digit);
+  let digit = getRandomDigit();
+  totalItems = digit;
   foundCount = 0;
   startTime = new Date();
 
   pickColorForBar();
   square.style.backgroundColor = currentSquareColor;
   square.style.color='white';
-  
-  document.getElementById('foundButton').disabled=false;
-  document.getElementById('foundAllButton').disabled=false;
-  document.getElementById('clickCount').innerText='לחצת: 0 פעמים';
+
+  if(gameMode==="find"){
+    square.textContent = digit;
+    document.getElementById('buttonsArea').style.display='block';
+    document.getElementById('foundButton').style.display='inline-block';
+    document.getElementById('foundAllButton').style.display='inline-block';
+    document.getElementById('skipButton').style.display='inline-block';
+    document.getElementById('readBtn').style.display='inline-block';
+    document.getElementById('nextBtn').style.display='none';
+    document.getElementById('clickCount').innerText='לחצת: 0 פעמים';
+  } else { // מצב למד
+    square.textContent = digit;
+    document.getElementById('buttonsArea').style.display='block';
+    document.getElementById('foundButton').style.display='none';
+    document.getElementById('foundAllButton').style.display='none';
+    document.getElementById('skipButton').style.display='none';
+    document.getElementById('readBtn').style.display='inline-block';
+    document.getElementById('nextBtn').style.display='inline-block';
+  }
+
   document.getElementById('message').innerText='';
   updateScoreDisplay();
-
+  updateProgressBar();
   stageIndex++;
 }
 
-// פונקציית קונפטי
+// ---- קונפטי ----
 function showConfetti(){
   const colors=['#ff6b6b','#ffbe76','#f6e58d','#44a08d','#4ecdc4','#686de0','#e056fd','#ff7979','#ff9ff3','#f368e0','#ff9f43','#00d2d3'];
   const count=150; const screenHeight=window.innerHeight;
@@ -114,7 +171,7 @@ function showConfetti(){
   }
 }
 
-// סיום סיבוב
+// ---- סיום סיבוב ----
 function finishRound(){
   let endTime=new Date();
   let timeTaken=Math.floor((endTime-startTime)/1000);
@@ -123,58 +180,56 @@ function finishRound(){
   clickCounterForConfetti += points;
   setCookie('score',score,7);
   updateScoreDisplay();
+  updateProgressBar();
 
-  // קונפטי כל 15 נקודות
   if(clickCounterForConfetti >= 15){
     showConfetti();
     new Audio('Confetti.mp3').play().catch(()=>{});
     new Audio('newlevel.mp3').play().catch(()=>{});
     clickCounterForConfetti = 0;
-
-    // שינוי הרקע והמספר מיד לאחר הקונפטי
+    updateProgressBar();
     applyBackground(backgrounds[bgIndex]);
     bgIndex++; if(bgIndex >= backgrounds.length) bgIndex=0;
-    startRound(); 
-  } else {
-    // אחרת רק מספור חדש לסיבוב
-    startRound();
   }
+  startRound();
 }
 
-// לחיצות וכפתורים
+// ---- כפתורים ----
 document.getElementById('foundButton').onclick = () => {
   foundCount++;
   document.getElementById('clickCount').innerText='לחצת: '+foundCount+' פעמים';
-  const square=document.getElementById('colorSquare');
-  square.classList.remove('jump','flash'); void square.offsetWidth; square.classList.add('jump','flash');
-
   if(foundCount===totalItems){
-    document.getElementById('foundButton').disabled=true;
-    document.getElementById('foundAllButton').disabled=true;
     finishRound();
     document.getElementById('message').innerText='סיימת את הסיבוב!';
   }
 };
-
 document.getElementById('foundAllButton').onclick = () => {
   foundCount = totalItems;
-  document.getElementById('foundButton').disabled=true;
-  document.getElementById('foundAllButton').disabled=true;
   finishRound();
   document.getElementById('message').innerText='סיימת את הסיבוב!';
 };
-
 document.getElementById('skipButton').onclick = () => {
+  if(gameMode==="find" && foundCount>0){
+    score += foundCount;
+    clickCounterForConfetti += foundCount;
+    setCookie('score',score,7);
+    updateScoreDisplay();
+    updateProgressBar();
+  }
   document.getElementById('message').innerText='דלגת על הסיבוב!';
   startRound();
 };
-
 document.getElementById('readBtn').onclick = () => {
   const digit=document.getElementById('colorSquare').textContent;
   if(!digit) return;
   new Audio(`${digit}.mp3`).play().catch(()=>{});
 };
+document.getElementById('nextBtn').onclick = () => {
+  finishRound();
+  document.getElementById('message').innerText='עברת לסיבוב הבא!';
+};
 
+// ---- טיימר ----
 setInterval(()=>{
   if(startTime){
     let elapsed=Math.floor((new Date()-startTime)/1000);
@@ -182,9 +237,35 @@ setInterval(()=>{
   }
 },1000);
 
+// ---- החלפת מצב ----
+document.getElementById('switchModeBtn').addEventListener('click', ()=>{
+  gameMode = (gameMode==="find") ? "learn" : "find";
+  setCookie('gameMode',gameMode,7);
+  location.reload();
+});
+
+// ---- בחירת מצב ראשונית ----
+document.getElementById('chooseFind').addEventListener('click', ()=>{
+  gameMode="find";
+  setCookie('gameMode',"find",7);
+  document.getElementById('modeOverlay').style.display='none';
+  startRound();
+});
+document.getElementById('chooseLearn').addEventListener('click', ()=>{
+  gameMode="learn";
+  setCookie('gameMode',"learn",7);
+  document.getElementById('modeOverlay').style.display='none';
+  startRound();
+});
+
+// ---- התחלה ----
 applyBackground(backgrounds[bgIndex]);
-startRound();
+updateScoreDisplay();
+updateProgressBar();
+if(gameMode){
+  document.getElementById('modeOverlay').style.display='none';
+  startRound();
+}
 </script>
 </body>
 </html>
-
