@@ -253,8 +253,10 @@ document.getElementById('readBtn').onclick = () => {
   new Audio(`${digit}.mp3`).play().catch(()=>{});
 };
 document.getElementById('nextBtn').onclick = () => {
-  finishRound(0);
-  document.getElementById('message').innerText='עברת לסיבוב הבא!';
+    // ניקוד בסיסי לפי הזמן שחלף או מספר פריטים
+    let basePoints = Math.max(10 - Math.floor((new Date() - startTime)/1000), 1);
+    finishRound(basePoints);
+    document.getElementById('message').innerText='עברת לסיבוב הבא!';
 };
 
 // ---- טיימר ----
@@ -296,4 +298,5 @@ if(gameMode){
 </script>
 </body>
 </html>
+
 
