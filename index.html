@@ -53,7 +53,7 @@ button{padding:12px 24px;font-size:18px;margin:5px;color:white;border:none;borde
 <div id="buttonsArea">
   <button id="foundButton">מצאתי✋</button>
   <button id="foundAllButton">מצאתי הכל ✋✋✋</button>
-  <button id="skipButton">דלג😭</button>
+  <button id="skipButton">קשה מדי למצוא הכל</button>
   <button id="readBtn">🔊 הקרא</button>
   <button id="nextBtn" style="display:none;">➡️ הצלחתי! הבא</button>
 </div>
@@ -244,7 +244,7 @@ document.getElementById('skipButton').onclick = () => {
     updateScoreDisplay();
     updateProgressBar();
   }
-  document.getElementById('message').innerText = 'דלג😭';
+  document.getElementById('message').innerText = 'קשה מדי למצוא הכל';
   startRound();
 };
 document.getElementById('readBtn').onclick = () => {
@@ -298,6 +298,7 @@ if(gameMode){
 </script>
 </body>
 </html>
+
 
 
 
