@@ -53,7 +53,6 @@ button{padding:12px 24px;font-size:18px;margin:5px;color:white;border:none;borde
 <div id="buttonsArea">
   <button id="foundButton">מצאתי✋</button>
   <button id="foundAllButton">מצאתי הכל ✋✋✋</button>
-  <button id="skipButton">קשה מדי למצוא הכל</button>
   <button id="readBtn">🔊 הקרא</button>
   <button id="nextBtn" style="display:none;">➡️ הצלחתי! הבא</button>
 </div>
@@ -105,11 +104,9 @@ function getCookie(name){
 function updateScoreDisplay(){document.getElementById('score').innerText='נקודות: '+score;}
 
 // ---- מספר אקראי ----
-function getRandomDigit(){return Math.floor(Math.random()*9)+1;}
-function applyBackground(bg){
-  document.body.style.background = bg==='rainbow'
-    ? 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)'
-    : bg;
+function getRandomDigit(){
+  if(gameMode === "find") return Math.floor(Math.random() * 5) + 1; // 1-5 במצב מצא
+  return Math.floor(Math.random() * 9) + 1; // 1-9 במצב למד
 }
 
 // ---- בוחרים צבע לסרגל ----
@@ -155,19 +152,17 @@ function startRound(){
     document.getElementById('buttonsArea').style.display='block';
     document.getElementById('foundButton').style.display='inline-block';
     document.getElementById('foundAllButton').style.display='inline-block';
-    document.getElementById('skipButton').style.display='inline-block';
     document.getElementById('readBtn').style.display='inline-block';
     document.getElementById('nextBtn').style.display='none';
     document.getElementById('clickCount').innerText='לחצת: 0 פעמים';
-} else { // מצב למד
+  } else { // מצב למד
     square.textContent = digit;
     document.getElementById('buttonsArea').style.display='block';
     document.getElementById('foundButton').style.display='none';
     document.getElementById('foundAllButton').style.display='none';
-    document.getElementById('skipButton').style.display='none'; // הסר דלג במצב למד
     document.getElementById('readBtn').style.display='inline-block';
     document.getElementById('nextBtn').style.display='inline-block';
-}
+  }
 
   previousDigit = digit; // שמירת המספר הנוכחי כהקודם
   document.getElementById('message').innerText='';
@@ -236,7 +231,6 @@ document.getElementById('foundAllButton').onclick = () => {
   finishRound(basePoints + bonus);
   document.getElementById('message').innerText='סיימת את הסיבוב!';
 };
-document.getElementById('skipButton').onclick = () => {
   if(foundCount>0){
     score += foundCount;
     clickCounterForConfetti += foundCount;
@@ -244,7 +238,7 @@ document.getElementById('skipButton').onclick = () => {
     updateScoreDisplay();
     updateProgressBar();
   }
-  document.getElementById('message').innerText = 'קשה מדי למצוא הכל';
+  document.getElementById('message').innerText = 'דלג😭';
   startRound();
 };
 document.getElementById('readBtn').onclick = () => {
@@ -298,7 +292,4 @@ if(gameMode){
 </script>
 </body>
 </html>
-
-
-
 
