@@ -159,15 +159,15 @@ function startRound(){
     document.getElementById('readBtn').style.display='inline-block';
     document.getElementById('nextBtn').style.display='none';
     document.getElementById('clickCount').innerText='לחצת: 0 פעמים';
-  } else { // מצב למד
+} else { // מצב למד
     square.textContent = digit;
     document.getElementById('buttonsArea').style.display='block';
     document.getElementById('foundButton').style.display='none';
     document.getElementById('foundAllButton').style.display='none';
-    document.getElementById('skipButton').style.display='inline-block'; // כפתור דלג😭
+    document.getElementById('skipButton').style.display='none'; // הסר דלג במצב למד
     document.getElementById('readBtn').style.display='inline-block';
     document.getElementById('nextBtn').style.display='inline-block';
-  }
+}
 
   previousDigit = digit; // שמירת המספר הנוכחי כהקודם
   document.getElementById('message').innerText='';
@@ -298,5 +298,6 @@ if(gameMode){
 </script>
 </body>
 </html>
+
 
 
