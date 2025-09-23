@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ספרות רנדומליות עם צבעים</title>
+<title>ספרות רנדומליות עם קונפטי מלמעלה</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{height:100vh;display:flex;flex-direction:column;justify-content:space-between;align-items:center;overflow:hidden;transition:background 0.5s ease;}
+body{height:100vh;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;overflow:hidden;transition:background 0.5s ease;position:relative;}
+.progress-container{width:100%;height:20px;background:rgba(255,255,255,0.2);}
+.progress-bar{height:100%;width:0%;background:#ff6b6b;transition:width 0.3s ease, background 0.5s ease;}
 .digit-container{flex:1;display:flex;justify-content:center;align-items:center;width:100%;}
 .digit-display{font-size:15rem;font-weight:bold;color:white;text-shadow:0 0 30px rgba(0,0,0,0.5);transition: all 0.3s ease;user-select:none;}
 .digit-display.animate{transform:scale(1.2);text-shadow:0 0 50px rgba(0,0,0,0.8);}
-.button-container{padding:60px 20px;width:100%;display:flex;flex-direction:column;align-items:center;gap:15px;}
+.button-container{padding:20px 20px;width:100%;display:flex;flex-direction:column;align-items:center;gap:15px;}
 .generate-btn{background:linear-gradient(45deg,#ff6b6b,#ee5a24);border:none;border-radius:50px;color:white;font-size:1.5rem;font-weight:bold;padding:20px 40px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,0.3);transition:all 0.3s ease;min-width:200px;}
 .generate-btn:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(0,0,0,0.4);}
 .generate-btn:active{transform:translateY(0);box-shadow:0 5px 20px rgba(0,0,0,0.3);}
@@ -19,11 +21,16 @@ body{height:100vh;display:flex;flex-direction:column;justify-content:space-betwe
 .read-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,0.4);}
 .read-btn:active{transform:translateY(0);box-shadow:0 4px 15px rgba(0,0,0,0.3);}
 .welcome-text{color:white;font-size:1.2rem;text-align:center;opacity:0.8;margin-top:50px;}
-@media(max-width:480px){.digit-display{font-size:12rem;}.generate-btn{font-size:1.3rem;padding:18px 35px;min-width:180px;}.read-btn{font-size:1.1rem;padding:12px 25px;min-width:140px;}.welcome-text{font-size:1rem;margin-top:30px;}.button-container{padding:70px 20px;}}
-@media(max-width:320px){.digit-display{font-size:10rem;}.generate-btn{font-size:1.2rem;padding:15px 30px;min-width:160px;}.read-btn{font-size:1rem;padding:10px 20px;min-width:120px;}.button-container{padding:80px 20px;}}
+.confetti{position:absolute;width:10px;height:10px;opacity:0.8;pointer-events:none;animation:fall linear forwards;}
+@keyframes fall{0%{transform:translateY(0);}100%{transform:translateY(100vh) rotate(720deg);}}
+@media(max-width:480px){.digit-display{font-size:12rem;}.generate-btn{font-size:1.3rem;padding:18px 35px;min-width:180px;}.read-btn{font-size:1.1rem;padding:12px 25px;min-width:140px;}.welcome-text{font-size:1rem;margin-top:30px;}.button-container{padding:20px 20px;}}
+@media(max-width:320px){.digit-display{font-size:10rem;}.generate-btn{font-size:1.2rem;padding:15px 30px;min-width:160px;}.read-btn{font-size:1rem;padding:10px 20px;min-width:120px;}}
 </style>
 </head>
 <body>
+<div class="progress-container">
+    <div id="progressBar" class="progress-bar"></div>
+</div>
 <div class="digit-container">
     <div id="digitDisplay" class="digit-display">
         <div class="welcome-text">לחץ על הכפתור לספרה רנדומלית</div>
@@ -40,10 +47,11 @@ let fontClasses = [];
 let lastDigits = [];
 let lastFonts = [];
 let currentColorIndex = 0;
-let colorClickCounter = 0;
-let level = parseInt(getCookie("level")) || 1; // משתנה level
+let colorClickCounter = parseInt(getCookie("colorClickCounter")) || 0;
+let level = parseInt(getCookie("level")) || 1;
+let firstLevelExtraClick = true; 
+let currentColorObj = null;
 
-// סדר הצבעים בלי rainbow-blink
 const sequenceColors = [
     {color:'#ff6b6b', bg:'#6a6fd5'},
     {color:'#ffbe76', bg:'#ff6b6b'},
@@ -60,138 +68,87 @@ const sequenceColors = [
     {color:'rainbow', bg:'#ffbe00'}
 ];
 
-// ---------------- פונקציות cookies ----------------
-function setCookie(name, value, days=30) {
-    const d = new Date();
-    d.setTime(d.getTime() + (days*24*60*60*1000));
-    document.cookie = name + "=" + encodeURIComponent(value) + ";expires=" + d.toUTCString() + ";path=/";
-}
+function setCookie(name,value,days=30){const d=new Date();d.setTime(d.getTime()+(days*24*60*60*1000));document.cookie=name+"="+encodeURIComponent(value)+";expires="+d.toUTCString()+";path=/";}
+function getCookie(name){const cname=name+"=";const decodedCookie=decodeURIComponent(document.cookie);const ca=decodedCookie.split(';');for(let i=0;i<ca.length;i++){let c=ca[i].trim();if(c.indexOf(cname)===0)return c.substring(cname.length,c.length);}return null;}
 
-function getCookie(name) {
-    const cname = name + "=";
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(';');
-    for(let i=0;i<ca.length;i++){
-        let c = ca[i].trim();
-        if (c.indexOf(cname)===0) return c.substring(cname.length,c.length);
-    }
-    return null;
-}
-// ---------------------------------------------------
-
-// טוען את הפונטים מקובץ fonts.txt
 fetch('fonts.txt')
-    .then(resp => resp.text())
-    .then(data => {
-        const styleEl = document.createElement('style');
-        styleEl.textContent = data;
+    .then(resp=>resp.text())
+    .then(data=>{
+        const styleEl=document.createElement('style');
+        styleEl.textContent=data;
         document.head.appendChild(styleEl);
-
-        fontClasses = data.split('\n')
-            .map(line => line.match(/^\.(.+?)\s*\{/))
-            .filter(Boolean)
-            .map(match => match[1].trim());
+        fontClasses=data.split('\n').map(line=>line.match(/^\.(.+?)\s*\{/)).filter(Boolean).map(match=>match[1].trim());
     })
-    .catch(err => console.error('Error loading fonts.txt:', err));
+    .catch(err=>console.error('Error loading fonts.txt:', err));
 
-// שחזור מצב קודם מה־cookies
-const savedColorIndex = parseInt(getCookie("colorIndex"));
-const savedClickCounter = parseInt(getCookie("colorClickCounter"));
-if (!isNaN(savedColorIndex)) currentColorIndex = savedColorIndex;
-if (!isNaN(savedClickCounter)) colorClickCounter = savedClickCounter;
-if (!isNaN(savedColorIndex)) {
-    const lastColorObj = sequenceColors[savedColorIndex];
-    applyColorToBackground(lastColorObj.bg);
-}
+currentColorObj = sequenceColors[currentColorIndex];
+applyColorToBackground(currentColorObj.bg);
+updateProgressBar();
 
-// ---------------- פונקציות ----------------
-function getRandomDigit(){
-    let digit;
-    do { digit = Math.floor(Math.random()*10); } while(lastDigits.includes(digit));
-    lastDigits.push(digit);
-    if(lastDigits.length>5) lastDigits.shift();
-    return digit;
-}
-
-function getRandomFont(){
-    if(fontClasses.length===0) return '';
-    let font;
-    do { font = fontClasses[Math.floor(Math.random()*fontClasses.length)]; } 
-    while(lastFonts.includes(font) && lastFonts.length<fontClasses.length);
-    lastFonts.push(font);
-    if(lastFonts.length>10) lastFonts.shift();
-    return font;
-}
+function getRandomDigit(){let digit;do{digit=Math.floor(Math.random()*10);}while(lastDigits.includes(digit));lastDigits.push(digit);if(lastDigits.length>5) lastDigits.shift();return digit;}
+function getRandomFont(){if(fontClasses.length===0)return ''; let font; do{font=fontClasses[Math.floor(Math.random()*fontClasses.length)];}while(lastFonts.includes(font)&&lastFonts.length<fontClasses.length);lastFonts.push(font);if(lastFonts.length>10) lastFonts.shift();return font;}
 
 function getNextColor(){
-    const colorObj = sequenceColors[currentColorIndex];
     colorClickCounter++;
-    if(colorClickCounter>=10){
+    let threshold = firstLevelExtraClick ? 11 : 10;
+
+    if(colorClickCounter >= threshold){
         colorClickCounter=0;
         currentColorIndex++;
-        if(currentColorIndex>=sequenceColors.length) currentColorIndex=0;
+        if(currentColorIndex >= sequenceColors.length) currentColorIndex=0;
+
+        level++;
+        setCookie("level", level);
+        firstLevelExtraClick = false;
+
+        currentColorObj = sequenceColors[currentColorIndex];
+        applyColorToBackground(currentColorObj.bg);
+
+        showConfetti(); // קונפטי מלמעלה
+        const readBtn = document.getElementById('readBtn');
+        readBtn.disabled = true;
+        const audioNewLevel = new Audio('newlevel.mp3');
+        audioNewLevel.play().catch(err=>console.error(err));
+        audioNewLevel.onended=()=>{readBtn.disabled=false;};
     }
 
     setCookie("colorIndex", currentColorIndex);
     setCookie("colorClickCounter", colorClickCounter);
-
-    return colorObj;
+    updateProgressBar();
+    return currentColorObj;
 }
 
 function applyColorToBackground(bg){
-    const body = document.body;
-    if(bg === 'rainbow'){
-        body.style.background='linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
-    } else {
-        body.style.background=bg;
-    }
+    const body=document.body;
+    if(bg==='rainbow'){body.style.background='linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';} 
+    else {body.style.background=bg;}
+}
+
+function updateProgressBar(){
+    const progressBar=document.getElementById('progressBar');
+    const threshold = firstLevelExtraClick ? 11 : 10;
+    const percentage = Math.floor((colorClickCounter/threshold)*100);
+    progressBar.style.width = percentage + '%';
+    progressBar.style.background = (currentColorObj.color==='rainbow')?'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)':currentColorObj.color;
 }
 
 function generateRandomDigit(){
-    const digitDisplay = document.getElementById('digitDisplay');
-    const generateBtn = document.getElementById('generateBtn');
-    const readBtn = document.getElementById('readBtn');
-
-    if(isFirstClick){ digitDisplay.innerHTML=''; isFirstClick=false; }
+    const digitDisplay=document.getElementById('digitDisplay');
+    const generateBtn=document.getElementById('generateBtn');
+    const readBtn=document.getElementById('readBtn');
+    if(isFirstClick){digitDisplay.innerHTML='';isFirstClick=false;}
     generateBtn.disabled=true;
-
-    const randomDigit = getRandomDigit();
-    currentDigit = randomDigit;
-    const randomFont = getRandomFont();
-    const colorObj = getNextColor();
-
-    applyColorToBackground(colorObj.bg);
-
+    const randomDigit=getRandomDigit();
+    currentDigit=randomDigit;
+    const randomFont=getRandomFont();
+    const colorObj=getNextColor();
     digitDisplay.className='digit-display animate';
     if(randomFont) digitDisplay.classList.add(randomFont);
-
-    if(colorObj.color==='rainbow'){
-        digitDisplay.style.background='linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
-        digitDisplay.style.webkitBackgroundClip='text';
-        digitDisplay.style.color='transparent';
-        digitDisplay.style.animation='';
-    } else {
-        digitDisplay.style.color=colorObj.color;
-        digitDisplay.style.background='';
-        digitDisplay.style.animation='';
-    }
-
+    if(colorObj.color==='rainbow'){digitDisplay.style.background='linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';digitDisplay.style.webkitBackgroundClip='text';digitDisplay.style.color='transparent';digitDisplay.style.animation='';} 
+    else {digitDisplay.style.color=colorObj.color;digitDisplay.style.background='';digitDisplay.style.animation='';}
     digitDisplay.textContent=randomDigit;
     readBtn.classList.add('show');
-
-    // בדיקה אם צריך להעלות level
-if(colorClickCounter === 0){ // כל 10 לחיצות
-    level++;
-    setCookie("level", level);
-    readBtn.disabled = true;
-
-    const audioNewLevel = new Audio('newlevel.mp3');
-    audioNewLevel.play().catch(err=>console.error(err));
-    audioNewLevel.onended = () => { readBtn.disabled = false; };
-}
-
-
-    setTimeout(()=>{ digitDisplay.classList.remove('animate'); generateBtn.disabled=false; },300);
+    setTimeout(()=>{digitDisplay.classList.remove('animate');generateBtn.disabled=false;},300);
 }
 
 function playAudio(){
@@ -199,10 +156,31 @@ function playAudio(){
     const readBtn=document.getElementById('readBtn');
     readBtn.disabled=true;
     const audio=new Audio(`${currentDigit}.mp3`);
-    audio.oncanplaythrough=function(){ audio.play().catch(err=>{ alert('שגיאה בניגון השמע'); readBtn.disabled=false; }); };
-    audio.onended=function(){ readBtn.disabled=false; };
-    audio.onerror=function(){ alert('שגיאה בטעינת השמע'); readBtn.disabled=false; };
-    setTimeout(()=>{ if(readBtn.disabled) readBtn.disabled=false; },3000);
+    audio.oncanplaythrough=function(){audio.play().catch(err=>{alert('שגיאה בניגון השמע');readBtn.disabled=false;});};
+    audio.onended=function(){readBtn.disabled=false;};
+    audio.onerror=function(){alert('שגיאה בטעינת השמע');readBtn.disabled=false;};
+    setTimeout(()=>{if(readBtn.disabled) readBtn.disabled=false;},3000);
+}
+
+// קונפטי מלמעלה - 500 חלקים
+function showConfetti(){
+    const colors=['#ff6b6b','#ffbe76','#f6e58d','#44a08d','#4ecdc4','#686de0','#e056fd','#ff7979','#ff9ff3','#f368e0','#ff9f43','#00d2d3'];
+    for(let i=0;i<500;i++){
+        const confetti=document.createElement('div');
+        confetti.className='confetti';
+        confetti.style.background=colors[Math.floor(Math.random()*colors.length)];
+        confetti.style.width=(5+Math.random()*8)+'px';
+        confetti.style.height=(5+Math.random()*8)+'px';
+        // מהירות נפילה אקראית בין 1s ל-5s
+        confetti.style.animationDuration=(1+Math.random()*4)+'s';
+        // עיכוב אקראי להתחלה, בין 0 ל-3 שניות
+        confetti.style.animationDelay=(Math.random()*3)+'s';
+        // להתחיל בגובה אקראי מעל המסך (כדי לא ליצור פס ברור)
+        confetti.style.top=(-Math.random()*100)+'px';
+        confetti.style.left=Math.random()*100+'vw';
+        document.body.appendChild(confetti);
+        setTimeout(()=>{confetti.remove();},7000);
+    }
 }
 
 // מניעת זום כפול בטאצ'
