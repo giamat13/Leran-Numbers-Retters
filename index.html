@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ספרות רנדומליות עם קונפטי מלמעלה</title>
+<title>ספרות רנדומליות עם קונפטי</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{height:100vh;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;overflow:hidden;transition:background 0.5s ease;position:relative;}
@@ -21,8 +21,8 @@ body{height:100vh;display:flex;flex-direction:column;justify-content:flex-start;
 .read-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,0.4);}
 .read-btn:active{transform:translateY(0);box-shadow:0 4px 15px rgba(0,0,0,0.3);}
 .welcome-text{color:white;font-size:1.2rem;text-align:center;opacity:0.8;margin-top:50px;}
-.confetti{position:absolute;width:10px;height:10px;opacity:0.8;pointer-events:none;animation:fall linear forwards;}
-@keyframes fall{0%{transform:translateY(0);}100%{transform:translateY(100vh) rotate(720deg);}}
+.confetti{position:absolute;pointer-events:none;animation:fall linear forwards;}
+@keyframes fall{0%{transform:translateY(0) rotate(0deg);}100%{transform:translateY(100vh) rotate(720deg);}}
 @media(max-width:480px){.digit-display{font-size:12rem;}.generate-btn{font-size:1.3rem;padding:18px 35px;min-width:180px;}.read-btn{font-size:1.1rem;padding:12px 25px;min-width:140px;}.welcome-text{font-size:1rem;margin-top:30px;}.button-container{padding:20px 20px;}}
 @media(max-width:320px){.digit-display{font-size:10rem;}.generate-btn{font-size:1.2rem;padding:15px 30px;min-width:160px;}.read-btn{font-size:1rem;padding:10px 20px;min-width:120px;}}
 </style>
@@ -41,18 +41,18 @@ body{height:100vh;display:flex;flex-direction:column;justify-content:flex-start;
     <button id="readBtn" class="read-btn" onclick="playAudio()">🔊 הקרא</button>
 </div>
 <script>
-let isFirstClick = true;
-let currentDigit = null;
-let fontClasses = [];
-let lastDigits = [];
-let lastFonts = [];
-let currentColorIndex = 0;
-let colorClickCounter = parseInt(getCookie("colorClickCounter")) || 0;
-let level = parseInt(getCookie("level")) || 1;
-let firstLevelExtraClick = true; 
-let currentColorObj = null;
+let isFirstClick=true;
+let currentDigit=null;
+let fontClasses=[];
+let lastDigits=[];
+let lastFonts=[];
+let currentColorIndex=0;
+let colorClickCounter=parseInt(getCookie("colorClickCounter"))||0;
+let level=parseInt(getCookie("level"))||1;
+let firstLevelExtraClick=true;
+let currentColorObj=null;
 
-const sequenceColors = [
+const sequenceColors=[
     {color:'#ff6b6b', bg:'#6a6fd5'},
     {color:'#ffbe76', bg:'#ff6b6b'},
     {color:'#f6e58d', bg:'#ffbe76'},
@@ -81,7 +81,7 @@ fetch('fonts.txt')
     })
     .catch(err=>console.error('Error loading fonts.txt:', err));
 
-currentColorObj = sequenceColors[currentColorIndex];
+currentColorObj=sequenceColors[currentColorIndex];
 applyColorToBackground(currentColorObj.bg);
 updateProgressBar();
 
@@ -90,30 +90,30 @@ function getRandomFont(){if(fontClasses.length===0)return ''; let font; do{font=
 
 function getNextColor(){
     colorClickCounter++;
-    let threshold = firstLevelExtraClick ? 11 : 10;
+    let threshold=firstLevelExtraClick?11:10;
 
-    if(colorClickCounter >= threshold){
+    if(colorClickCounter>=threshold){
         colorClickCounter=0;
         currentColorIndex++;
-        if(currentColorIndex >= sequenceColors.length) currentColorIndex=0;
+        if(currentColorIndex>=sequenceColors.length) currentColorIndex=0;
 
         level++;
-        setCookie("level", level);
-        firstLevelExtraClick = false;
+        setCookie("level",level);
+        firstLevelExtraClick=false;
 
-        currentColorObj = sequenceColors[currentColorIndex];
+        currentColorObj=sequenceColors[currentColorIndex];
         applyColorToBackground(currentColorObj.bg);
 
         showConfetti(); // קונפטי מלמעלה
-        const readBtn = document.getElementById('readBtn');
-        readBtn.disabled = true;
-        const audioNewLevel = new Audio('newlevel.mp3');
+        const readBtn=document.getElementById('readBtn');
+        readBtn.disabled=true;
+        const audioNewLevel=new Audio('newlevel.mp3');
         audioNewLevel.play().catch(err=>console.error(err));
         audioNewLevel.onended=()=>{readBtn.disabled=false;};
     }
 
-    setCookie("colorIndex", currentColorIndex);
-    setCookie("colorClickCounter", colorClickCounter);
+    setCookie("colorIndex",currentColorIndex);
+    setCookie("colorClickCounter",colorClickCounter);
     updateProgressBar();
     return currentColorObj;
 }
@@ -126,10 +126,10 @@ function applyColorToBackground(bg){
 
 function updateProgressBar(){
     const progressBar=document.getElementById('progressBar');
-    const threshold = firstLevelExtraClick ? 11 : 10;
-    const percentage = Math.floor((colorClickCounter/threshold)*100);
-    progressBar.style.width = percentage + '%';
-    progressBar.style.background = (currentColorObj.color==='rainbow')?'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)':currentColorObj.color;
+    const threshold=firstLevelExtraClick?11:10;
+    const percentage=Math.floor((colorClickCounter/threshold)*100);
+    progressBar.style.width=percentage+'%';
+    progressBar.style.background=(currentColorObj.color==='rainbow')?'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)':currentColorObj.color;
 }
 
 function generateRandomDigit(){
@@ -162,24 +162,40 @@ function playAudio(){
     setTimeout(()=>{if(readBtn.disabled) readBtn.disabled=false;},3000);
 }
 
-// קונפטי מלמעלה - 500 חלקים
+// קונפטי מלמעלה בלבד - 500 חלקים, מהירות אקראית
 function showConfetti(){
     const colors=['#ff6b6b','#ffbe76','#f6e58d','#44a08d','#4ecdc4','#686de0','#e056fd','#ff7979','#ff9ff3','#f368e0','#ff9f43','#00d2d3'];
+    const screenHeight = window.innerHeight;
     for(let i=0;i<500;i++){
         const confetti=document.createElement('div');
         confetti.className='confetti';
         confetti.style.background=colors[Math.floor(Math.random()*colors.length)];
-        confetti.style.width=(5+Math.random()*8)+'px';
-        confetti.style.height=(5+Math.random()*8)+'px';
-        // מהירות נפילה אקראית בין 1s ל-5s
-        confetti.style.animationDuration=(1+Math.random()*4)+'s';
-        // עיכוב אקראי להתחלה, בין 0 ל-3 שניות
+        const size = 5+Math.random()*8;
+        confetti.style.width=size+'px';
+        confetti.style.height=size+'px';
+        const duration = 1+Math.random()*4; // מהירות נפילה אקראית
+        confetti.style.animationDuration=duration+'s';
         confetti.style.animationDelay=(Math.random()*3)+'s';
-        // להתחיל בגובה אקראי מעל המסך (כדי לא ליצור פס ברור)
         confetti.style.top=(-Math.random()*100)+'px';
         confetti.style.left=Math.random()*100+'vw';
+
+        // עדכון keyframes דינמי לפי גובה המסך
+        const fallKeyframes = document.createElement('style');
+        const animName = 'fall'+i;
+        fallKeyframes.innerHTML = `
+        @keyframes ${animName}{
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(${screenHeight + size}px) rotate(720deg); }
+        }`;
+        document.head.appendChild(fallKeyframes);
+        confetti.style.animationName = animName;
+        confetti.style.animationTimingFunction = 'linear';
+        confetti.style.animationFillMode = 'forwards';
+
         document.body.appendChild(confetti);
-        setTimeout(()=>{confetti.remove();},7000);
+
+        // הסרה אחרי סיום האנימציה
+        confetti.addEventListener('animationend',()=>{confetti.remove(); fallKeyframes.remove();});
     }
 }
 
