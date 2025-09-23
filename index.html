@@ -110,7 +110,7 @@ function pickColorForBar(){
 
 // ---- Progress Bar ----
 function updateProgressBar(){
-  const progress = (clickCounterForConfetti / 15) * 100;
+  const progress = (clickCounterForConfetti / 50) * 100;
   document.getElementById('colorBar').style.width = progress + '%';
 }
 
@@ -182,7 +182,7 @@ function finishRound(){
   updateScoreDisplay();
   updateProgressBar();
 
-  if(clickCounterForConfetti >= 15){
+  if(clickCounterForConfetti >= 50){
     showConfetti();
     new Audio('Confetti.mp3').play().catch(()=>{});
     new Audio('newlevel.mp3').play().catch(()=>{});
@@ -269,3 +269,4 @@ if(gameMode){
 </script>
 </body>
 </html>
+
