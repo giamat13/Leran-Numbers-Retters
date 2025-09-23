@@ -48,7 +48,7 @@ button{padding:12px 24px;font-size:18px;margin:5px;color:white;border:none;borde
 <div id="buttonsArea">
   <button id="foundButton">מצאתי✋</button>
   <button id="foundAllButton">מצאתי הכל ✋✋✋</button>
-  <button id="skipButton">דלג</button>
+  <button id="skipButton">דלג😭</button>
   <button id="readBtn">🔊 הקרא</button>
   <button id="nextBtn" style="display:none;">➡️ העבר</button>
 </div>
@@ -110,7 +110,7 @@ function pickColorForBar(){
 
 // ---- Progress Bar ----
 function updateProgressBar(){
-  const progress = (clickCounterForConfetti / 50) * 100;
+  const progress = (clickCounterForConfetti / 15) * 100;
   document.getElementById('colorBar').style.width = progress + '%';
 }
 
@@ -140,7 +140,7 @@ function startRound(){
     document.getElementById('buttonsArea').style.display='block';
     document.getElementById('foundButton').style.display='none';
     document.getElementById('foundAllButton').style.display='none';
-    document.getElementById('skipButton').style.display='none';
+    document.getElementById('skipButton').style.display='inline-block'; // כפתור דלג😭
     document.getElementById('readBtn').style.display='inline-block';
     document.getElementById('nextBtn').style.display='inline-block';
   }
@@ -182,7 +182,7 @@ function finishRound(){
   updateScoreDisplay();
   updateProgressBar();
 
-  if(clickCounterForConfetti >= 50){
+  if(clickCounterForConfetti >= 15){
     showConfetti();
     new Audio('Confetti.mp3').play().catch(()=>{});
     new Audio('newlevel.mp3').play().catch(()=>{});
@@ -216,7 +216,7 @@ document.getElementById('skipButton').onclick = () => {
     updateScoreDisplay();
     updateProgressBar();
   }
-  document.getElementById('message').innerText='דלגת על הסיבוב!';
+  document.getElementById('message').innerText = 'דלג😭';
   startRound();
 };
 document.getElementById('readBtn').onclick = () => {
@@ -269,4 +269,3 @@ if(gameMode){
 </script>
 </body>
 </html>
-
