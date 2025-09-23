@@ -41,6 +41,7 @@ let lastDigits = [];
 let lastFonts = [];
 let currentColorIndex = 0;
 let colorClickCounter = 0;
+let level = parseInt(getCookie("level")) || 1; // משתנה level
 
 // סדר הצבעים בלי rainbow-blink
 const sequenceColors = [
@@ -82,12 +83,10 @@ function getCookie(name) {
 fetch('fonts.txt')
     .then(resp => resp.text())
     .then(data => {
-        // מכניס את התוכן כ־CSS
         const styleEl = document.createElement('style');
         styleEl.textContent = data;
         document.head.appendChild(styleEl);
 
-        // מחלץ את שמות המחלקות
         fontClasses = data.split('\n')
             .map(line => line.match(/^\.(.+?)\s*\{/))
             .filter(Boolean)
@@ -133,7 +132,6 @@ function getNextColor(){
         if(currentColorIndex>=sequenceColors.length) currentColorIndex=0;
     }
 
-    // שמירה ב־cookies
     setCookie("colorIndex", currentColorIndex);
     setCookie("colorClickCounter", colorClickCounter);
 
@@ -162,10 +160,8 @@ function generateRandomDigit(){
     const randomFont = getRandomFont();
     const colorObj = getNextColor();
 
-    // רקע
     applyColorToBackground(colorObj.bg);
 
-    // טקסט + פונט
     digitDisplay.className='digit-display animate';
     if(randomFont) digitDisplay.classList.add(randomFont);
 
@@ -182,6 +178,18 @@ function generateRandomDigit(){
 
     digitDisplay.textContent=randomDigit;
     readBtn.classList.add('show');
+
+    // בדיקה אם צריך להעלות level
+if(colorClickCounter === 0){ // כל 10 לחיצות
+    level++;
+    setCookie("level", level);
+    readBtn.disabled = true;
+
+    const audioNewLevel = new Audio('newlevel.mp3');
+    audioNewLevel.play().catch(err=>console.error(err));
+    audioNewLevel.onended = () => { readBtn.disabled = false; };
+}
+
 
     setTimeout(()=>{ digitDisplay.classList.remove('animate'); generateBtn.disabled=false; },300);
 }
